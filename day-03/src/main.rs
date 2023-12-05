@@ -1,7 +1,7 @@
 use ::anyhow::Result;
 
 fn main() {
-    let input = include_str!("part1_ex.in");
+    let input = include_str!("input.in");
     let res = part1(input).unwrap();
     dbg!(res);
 }
@@ -22,25 +22,32 @@ fn read_grid(input: &str) -> Result<Vec<Vec<char>>> {
 // otherwise elegantly in rust
 fn is_part_number(grid: &Vec<Vec<char>>, i: usize, j: usize) -> Result<bool> {
     let offsets = [
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1), /*(i, j)*/ (0, 1),
-        (1, -1), (1, 0), (1, 1),
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        /*(i, j)*/ (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
     ];
 
     for &(di, dj) in &offsets {
         let ni = i as i32 + di;
         let nj = j as i32 + dj;
 
-        if ni >= 0 && nj >= 0 &&
-           ni < grid.len() as i32 && nj < grid[0].len() as i32 &&
-           !grid[ni as usize][nj as usize].is_digit(10) &&
-           grid[ni as usize][nj as usize] != '.' {
+        if ni >= 0
+            && nj >= 0
+            && ni < grid.len() as i32
+            && nj < grid[0].len() as i32
+            && !grid[ni as usize][nj as usize].is_digit(10)
+            && grid[ni as usize][nj as usize] != '.'
+        {
             return Ok(true);
         }
     }
 
     Ok(false)
-
 }
 
 fn part1(input: &str) -> Result<usize> {
@@ -51,10 +58,16 @@ fn part1(input: &str) -> Result<usize> {
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             if grid[i][j].is_digit(10) {
-                check = if is_part_number(&grid,i,j)? {true} else {check};
+                check = if is_part_number(&grid, i, j)? {
+                    true
+                } else {
+                    check
+                };
                 current_number.push(grid[i][j]);
             } else {
-                if check { sum += current_number.parse::<usize>()?; }
+                if check {
+                    sum += current_number.parse::<usize>()?;
+                }
                 current_number = String::from("");
                 check = false;
             }
@@ -69,10 +82,14 @@ fn part2(input: &str) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
 
     #[test]
     fn part1_ex() {
-        assert_eq!(true, true);
+        let expected = 4361;
+        let result = part1(include_str!("part1_ex.in"));
+        println!("expected: {:?}, received {:?}", expected, result);
+        assert_eq!(result.is_ok_and(|x| x == expected), true);
     }
 
     #[test]
