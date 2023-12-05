@@ -48,7 +48,7 @@ fn part2(input: &str) -> Result<usize> {
                 };
             }
         }
-        let power = max_r*max_g*max_b;
+        let power = max_r * max_g * max_b;
         sum += power
     }
 
