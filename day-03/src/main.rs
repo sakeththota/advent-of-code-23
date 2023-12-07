@@ -2,20 +2,17 @@ use ::anyhow::Result;
 
 fn main() {
     let input = include_str!("input.in");
-    let res = part1(input).unwrap();
-    dbg!(res);
+    let p1 = part1(input).unwrap();
+    dbg!(p1);
+    let p2 = part2(input).unwrap();
+    dbg!(p2);
 }
 
 fn read_grid(input: &str) -> Result<Vec<Vec<char>>> {
-    let mut grid = Vec::new();
-    for line in input.lines() {
-        let mut row = Vec::new();
-        for c in line.chars() {
-            row.push(c);
-        }
-        grid.push(row);
-    }
-    Ok(grid)
+    Ok(input
+        .lines()
+        .map(|s| s.chars().collect())
+        .collect::<Vec<Vec<char>>>())
 }
 
 // returns true if the cell adjacent or diagonal to i,j is not a number and not a dot and false
@@ -26,7 +23,7 @@ fn is_part_number(grid: &Vec<Vec<char>>, i: usize, j: usize) -> Result<bool> {
         (-1, 0),
         (-1, 1),
         (0, -1),
-        /*(i, j)*/ (0, 1),
+        (0, 1),
         (1, -1),
         (1, 0),
         (1, 1),
@@ -58,11 +55,9 @@ fn part1(input: &str) -> Result<usize> {
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             if grid[i][j].is_digit(10) {
-                check = if is_part_number(&grid, i, j)? {
-                    true
-                } else {
-                    check
-                };
+                if is_part_number(&grid, i, j)? {
+                    check = true;
+                }
                 current_number.push(grid[i][j]);
             } else {
                 if check {
@@ -76,8 +71,10 @@ fn part1(input: &str) -> Result<usize> {
     Ok(sum)
 }
 
-fn part2(input: &str) -> Result<()> {
-    Ok(())
+fn part2(input: &str) -> Result<usize> {
+    let grid = read_grid(input)?;
+    println!("{:?}", grid);
+    Ok(0)
 }
 
 #[cfg(test)]
@@ -94,6 +91,9 @@ mod tests {
 
     #[test]
     fn part2_ex() {
-        assert_eq!(true, true);
+        let expected = 467835;
+        let result = part2(include_str!("part2_ex.in"));
+        println!("expected: {:?}, received {:?}", expected, result);
+        assert_eq!(result.is_ok_and(|x| x == expected), true);
     }
 }

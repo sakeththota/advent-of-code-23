@@ -27,7 +27,7 @@ fn part1(input: &str) -> Result<usize> {
     for line in input.lines() {
         let num_wins = count_wins(parse_card(line)?)? as u32;
         if num_wins > 0 {
-            sum += usize::pow(2, num_wins - 1);
+            sum += 1 << (num_wins - 1);
         }
     }
     Ok(sum)
