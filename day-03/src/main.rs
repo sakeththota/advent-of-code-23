@@ -105,8 +105,7 @@ fn get_gear_ratio(
     ];
 
     for (x, y) in offsets {
-        let val = get_adj_val(grid, i, j, &(x, y));
-        match val {
+        match get_adj_val(grid, i, j, &(x, y)) {
             Ok(val) => {
                 if val.is_digit(10) {
                     parts.insert(get_part_number(
@@ -121,11 +120,9 @@ fn get_gear_ratio(
     }
 
     if parts.len() == 2 {
-        let mut product = 1;
-        for part in parts.iter() {
-            product *= part.value.parse::<usize>()?;
-        }
-        return Ok(product);
+        return Ok(parts
+            .iter()
+            .fold(1, |acc, x| acc * x.value.parse::<usize>().unwrap()));
     }
 
     Ok(0)
@@ -138,6 +135,8 @@ fn part2(input: &str) -> Result<usize> {
     let mut check = false;
     let mut start = 0;
     let mut end = 0;
+
+    // get all part numbers
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             if grid[i][j].is_digit(10) {
@@ -163,9 +162,8 @@ fn part2(input: &str) -> Result<usize> {
             }
         }
     }
-    //return Ok(0);
-    // part numbers are correct (expect 532428)
 
+    // compute product of gear ratios
     let mut sum_gear_ratios = 0;
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
