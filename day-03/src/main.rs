@@ -79,7 +79,7 @@ struct PartNumber {
 
 fn get_part_number(part_numbers: &Vec<PartNumber>, i: usize, j: usize) -> Result<&PartNumber> {
     for part_number in part_numbers {
-        if part_number.y == i && (part_number.x1..part_number.x2 + 1).contains(&j) {
+        if part_number.y == i && (part_number.x1..=part_number.x2).contains(&j) {
             return Ok(part_number);
         }
     }
@@ -103,19 +103,17 @@ fn get_gear_ratio(
         (1, 0),
         (1, 1),
     ];
+
     for (x, y) in offsets {
         let val = get_adj_val(grid, i, j, &(x, y));
         match val {
             Ok(val) => {
-                println!("{}", val);
                 if val.is_digit(10) {
-                    let out: &PartNumber = get_part_number(
+                    parts.insert(get_part_number(
                         &part_numbers,
                         (i as i32 + x) as usize,
                         (j as i32 + y) as usize,
-                    )?;
-                    println!("{:?}", out);
-                    parts.insert(out);
+                    )?);
                 }
             }
             Err(_e) => continue,
@@ -124,15 +122,13 @@ fn get_gear_ratio(
 
     if parts.len() == 2 {
         let mut product = 1;
-        println!("*: ");
         for part in parts.iter() {
-            println!("{:?}", part);
             product *= part.value.parse::<usize>()?;
         }
-        Ok(product)
-    } else {
-        Ok(0)
+        return Ok(product);
     }
+
+    Ok(0)
 }
 
 fn part2(input: &str) -> Result<usize> {
@@ -140,17 +136,15 @@ fn part2(input: &str) -> Result<usize> {
     let mut part_numbers: Vec<PartNumber> = vec![];
     let mut current_number = String::from("");
     let mut check = false;
+    let mut start = 0;
+    let mut end = 0;
     for i in 0..grid.len() {
-        let mut start = -1;
-        let mut end = -1;
         for j in 0..grid[0].len() {
             if grid[i][j].is_digit(10) {
-                if start == -1 {
-                    start = j as isize;
-                    end = j as isize;
-                } else {
-                    end = j as isize;
-                }
+                if start == 0 {
+                    start = j;
+                };
+                end = j;
                 current_number.push(grid[i][j]);
                 check = check || is_part_number(&grid, i, j)?;
             } else {
@@ -158,22 +152,26 @@ fn part2(input: &str) -> Result<usize> {
                     part_numbers.push(PartNumber {
                         value: current_number.clone(),
                         y: if j == 0 { i - 1 } else { i },
-                        x1: start as usize,
-                        x2: end as usize,
+                        x1: start,
+                        x2: end,
                     });
                 }
                 current_number = String::from("");
                 check = false;
-                start = -1;
+                start = 0;
+                end = 0;
             }
         }
     }
-    println!("{:?}", part_numbers);
+    //return Ok(0);
+    // part numbers are correct (expect 532428)
+
     let mut sum_gear_ratios = 0;
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             if grid[i][j] == '*' {
-                sum_gear_ratios += get_gear_ratio(&part_numbers, &grid, i, j)?;
+                let gear_ratio = get_gear_ratio(&part_numbers, &grid, i, j)?;
+                sum_gear_ratios += gear_ratio;
             }
         }
     }
