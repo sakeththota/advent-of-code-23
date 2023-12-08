@@ -4,10 +4,10 @@ use ::anyhow::Result;
 
 fn main() {
     let input = include_str!("input.in");
-    let p1 = part1(input).unwrap();
-    dbg!(p1);
-    let p2 = part2(input).unwrap();
-    dbg!(p2);
+    let p1 = part1(input);
+    dbg!(p1.unwrap());
+    let p2 = part2(input);
+    dbg!(p2.unwrap());
 }
 
 fn read_grid(input: &str) -> Result<Vec<Vec<char>>> {

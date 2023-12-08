@@ -3,12 +3,10 @@ use std::collections::HashMap;
 fn main() {
     let input = include_str!("input.in");
     let p1 = part1(input);
-    dbg!(p1);
+    dbg!(p1.unwrap());
     let p2 = part2(input);
-    dbg!(p2);
-}   
-
-
+    dbg!(p2.unwrap());
+}
 
 fn part1(input: &str) -> Result<u32> {
     let mut sum: u32 = 0;
@@ -50,7 +48,9 @@ fn part2(input: &str) -> Result<u32> {
     for line in input.lines() {
         for i in 0..line.len() {
             for (key, val) in numbers.iter() {
-                if line[i..].starts_with(key) { digits.push(*val); }
+                if line[i..].starts_with(key) {
+                    digits.push(*val);
+                }
             }
         }
         let first: u32 = *digits.first().unwrap();

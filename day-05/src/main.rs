@@ -2,8 +2,8 @@ use ::anyhow::Result;
 
 fn main() {
     let input = include_str!("input.in");
-    let res = part1(input).unwrap();
-    dbg!(res);
+    let res = part1(input);
+    dbg!(res.unwrap());
 }
 
 fn part1(input: &str) -> Result<usize> {
