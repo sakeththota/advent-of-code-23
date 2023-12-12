@@ -1,9 +1,11 @@
 use anyhow::Result;
 
 fn main() {
-    let input = include_str!("part1_ex.in");
+    let input = include_str!("input.in");
     let p1 = part1(input);
     dbg!(p1.unwrap());
+    let p2 = part2(input);
+    dbg!(p2.unwrap());
 }
 
 // need to come back and clean this up gotta be a better way lmao
@@ -24,12 +26,26 @@ fn parse_races(input: &str) -> Result<(Vec<usize>, Vec<usize>)> {
 
 fn part1(input: &str) -> Result<usize> {
     let (times, distances) = parse_races(input)?;
-
-    Ok(0)
+    Ok(times.iter().enumerate().fold(1, |acc, (i, &x)| {
+        acc * (1..=x).filter(|y| y * (x - y) > distances[i]).count()
+    }))
 }
 
-fn part2(input: &str) -> Result<u32> {
-    Ok(0)
+fn part2(input: &str) -> Result<usize> {
+    let (times, distances) = parse_races(input)?;
+    let times = [times
+        .iter()
+        .fold("".to_string(), |acc, x| acc + &x.to_string())
+        .parse::<usize>()
+        .unwrap()];
+    let distances = [distances
+        .iter()
+        .fold("".to_string(), |acc, x| acc + &x.to_string())
+        .parse::<usize>()
+        .unwrap()];
+    Ok(times.iter().enumerate().fold(1, |acc, (i, &x)| {
+        acc * (1..=x).filter(|y| y * (x - y) > distances[i]).count()
+    }))
 }
 
 #[cfg(test)]
