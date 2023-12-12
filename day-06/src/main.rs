@@ -11,16 +11,32 @@ fn main() {
 // need to come back and clean this up gotta be a better way lmao
 fn parse_races(input: &str) -> Result<(Vec<usize>, Vec<usize>)> {
     let (line1, line2) = input.split_once("\n").unwrap();
-    let times: Vec<usize> = line1[line1.find(":").unwrap() + 2..]
-        .trim()
+    let times: Vec<usize> = line1
+        .strip_prefix("Time: ")
+        .unwrap()
         .split_whitespace()
         .filter_map(|num| num.parse::<usize>().ok())
         .collect();
-    let distances: Vec<usize> = line2[line2.find(":").unwrap() + 2..]
-        .trim()
+    let distances: Vec<usize> = line2
+        .strip_prefix("Distance: ")
+        .unwrap()
         .split_whitespace()
         .filter_map(|num| num.parse::<usize>().ok())
         .collect();
+    Ok((times, distances))
+}
+
+fn parse_race((times, distances): (Vec<usize>, Vec<usize>)) -> Result<([usize; 1], [usize; 1])> {
+    let times = [times
+        .iter()
+        .fold("".to_string(), |acc, x| acc + &x.to_string())
+        .parse::<usize>()
+        .unwrap()];
+    let distances = [distances
+        .iter()
+        .fold("".to_string(), |acc, x| acc + &x.to_string())
+        .parse::<usize>()
+        .unwrap()];
     Ok((times, distances))
 }
 
@@ -32,17 +48,7 @@ fn part1(input: &str) -> Result<usize> {
 }
 
 fn part2(input: &str) -> Result<usize> {
-    let (times, distances) = parse_races(input)?;
-    let times = [times
-        .iter()
-        .fold("".to_string(), |acc, x| acc + &x.to_string())
-        .parse::<usize>()
-        .unwrap()];
-    let distances = [distances
-        .iter()
-        .fold("".to_string(), |acc, x| acc + &x.to_string())
-        .parse::<usize>()
-        .unwrap()];
+    let (times, distances) = parse_race(parse_races(input)?)?;
     Ok(times.iter().enumerate().fold(1, |acc, (i, &x)| {
         acc * (1..=x).filter(|y| y * (x - y) > distances[i]).count()
     }))
@@ -54,7 +60,7 @@ mod tests {
 
     #[test]
     fn part1_ex() {
-        let expected = 13;
+        let expected = 288;
         let result = part1(include_str!("part1_ex.in"));
         println!("expected: {:?}, received {:?}", expected, result);
         assert_eq!(result.is_ok_and(|x| x == expected), true);
