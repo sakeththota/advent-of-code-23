@@ -2,6 +2,7 @@ use std::u64;
 
 use anyhow::Result;
 use regex::Regex;
+use std::collections::HashSet;
 
 fn main() {
     let input = include_str!("input.in");
@@ -9,19 +10,6 @@ fn main() {
     dbg!(p1.unwrap());
     let p2 = part2(input);
     dbg!(p2.unwrap());
-}
-
-#[derive(Debug)]
-struct Map {
-    id: String,
-    conversions: Vec<Conversion>,
-}
-
-#[derive(Debug)]
-struct Conversion {
-    destination: u64,
-    source: u64,
-    length: u64,
 }
 
 fn read_input(input: &str) -> Result<(Vec<u64>, Vec<Map>)> {
@@ -52,6 +40,37 @@ fn read_input(input: &str) -> Result<(Vec<u64>, Vec<Map>)> {
     Ok((seeds, maps))
 }
 
+fn seeds_to_ranges(seeds: Vec<u64>) -> Result<HashSet<u64>> {
+    assert_eq!(seeds.len() % 2, 0);
+    let ranges = seeds
+        .chunks(2)
+        .map(|pair| (pair[0], pair[1]))
+        .flat_map(|(start, len)| (start..start + len).collect::<Vec<u64>>())
+        .collect::<HashSet<u64>>();
+    Ok(ranges)
+}
+
+fn seed_to_loc(seed: &u64, maps: &Vec<Map>) -> Result<u64> {
+    let mut cur = *seed;
+    for map in maps {
+        cur = map.source_to_dest(&cur)?;
+    }
+    Ok(cur)
+}
+
+#[derive(Debug)]
+struct Map {
+    id: String,
+    conversions: Vec<Conversion>,
+}
+
+#[derive(Debug)]
+struct Conversion {
+    destination: u64,
+    source: u64,
+    length: u64,
+}
+
 impl Map {
     fn source_to_dest(&self, src: &u64) -> Result<u64> {
         for conversion in &self.conversions {
@@ -61,14 +80,6 @@ impl Map {
         }
         Ok(*src)
     }
-}
-
-fn seed_to_loc(seed: &u64, maps: &Vec<Map>) -> Result<u64> {
-    let mut cur = *seed;
-    for map in maps {
-        cur = map.source_to_dest(&cur)?;
-    }
-    Ok(cur)
 }
 
 fn part1(input: &str) -> Result<u64> {
@@ -84,6 +95,9 @@ fn part1(input: &str) -> Result<u64> {
 }
 
 fn part2(input: &str) -> Result<u64> {
+    let (seeds, maps) = read_input(input)?;
+    let ranges = seeds_to_ranges(seeds)?;
+
     Ok(0)
 }
 
@@ -94,7 +108,7 @@ mod tests {
     #[test]
     fn part1_ex() {
         let expected = 35;
-        let result = part1(include_str!("part1_ex.in"));
+        let result = part1(include_str!("example.in"));
         println!("expected: {:?}, received {:?}", expected, result);
         assert_eq!(result.is_ok_and(|x| x == expected), true);
     }
@@ -102,7 +116,7 @@ mod tests {
     #[test]
     fn part2_ex() {
         let expected = 46;
-        let result = part2(include_str!("part2_ex.in"));
+        let result = part2(include_str!("example.in"));
         println!("expected: {:?}, received {:?}", expected, result);
         assert_eq!(result.is_ok_and(|x| x == expected), true);
     }
