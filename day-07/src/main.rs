@@ -3,10 +3,10 @@ use std::cmp::{Ord, Ordering, PartialOrd};
 use std::slice::Iter;
 
 fn main() {
-    let input = include_str!("example.in");
-    let p1 = part1(input);
+    let input = include_str!("input.in");
+    let p1 = solve(input, false);
     dbg!(p1.unwrap());
-    let p2 = part2(input);
+    let p2 = solve(input, true);
     dbg!(p2.unwrap());
 }
 
@@ -41,7 +41,8 @@ enum Card {
 
 impl Card {
     pub fn iterator() -> Iter<'static, Card> {
-        static CARDS: [Card; 13] = [
+        static CARDS: [Card; 14] = [
+            Card::Joker,
             Card::Two,
             Card::Three,
             Card::Four,
@@ -69,6 +70,7 @@ struct Hand {
 
 impl Hand {
     fn new(cards: String, bid: u32, jokers: bool) -> Hand {
+        // parse cards
         let cards: Vec<Card> = cards
             .chars()
             .map(|x| match x {
@@ -94,31 +96,34 @@ impl Hand {
                 _ => panic!("Invalid card"),
             })
             .collect();
+        // count matching cards
         let mut card_counts = Vec::new();
         let mut joker_count = 0;
         Card::iterator().for_each(|card_type| {
+            let count = cards
+                .iter()
+                .filter(|in_hand| {
+                    return &card_type == in_hand;
+                })
+                .count();
             if card_type == &Card::Joker {
-                joker_count += 1;
-            } else {
-                let count = cards
-                    .iter()
-                    .filter(|in_hand| {
-                        return &card_type == in_hand;
-                    })
-                    .count();
-                if count > 0 {
+                if count == 5 {
                     card_counts.push(count);
+                } else {
+                    joker_count = count;
                 }
+            } else if count > 0 {
+                card_counts.push(count);
             }
         });
-        if joker_count > 0 {
-            let (max_index, _) = card_counts
-                .iter()
-                .enumerate()
-                .max_by_key(|(_, &value)| value)
-                .unwrap();
-            card_counts[max_index] += joker_count;
-        }
+        // add jokers
+        let (max_index, _) = card_counts
+            .iter()
+            .enumerate()
+            .max_by_key(|(_, &value)| value)
+            .unwrap();
+        card_counts[max_index] += joker_count;
+        // determine hand type
         let hand_type = match card_counts.len() {
             1 => HandType::FiveOfAKind,
             2 => {
@@ -166,30 +171,14 @@ impl Ord for Hand {
         }
     }
 }
-fn part1(input: &str) -> Result<usize> {
-    let mut hands: Vec<Hand> = Vec::new();
-    for (cards, bid) in input.lines().map(|x| x.split_once(" ").unwrap()) {
-        hands.push(Hand::new(
-            cards.to_string(),
-            bid.parse::<u32>().unwrap(),
-            false,
-        ));
-    }
-    hands.sort();
-    let mut total = 0;
-    for (index, hand) in hands.iter().enumerate() {
-        total += (index + 1) as usize * hand.bid as usize;
-    }
-    Ok(total)
-}
 
-fn part2(input: &str) -> Result<usize> {
+fn solve(input: &str, part2: bool) -> Result<usize> {
     let mut hands: Vec<Hand> = Vec::new();
     for (cards, bid) in input.lines().map(|x| x.split_once(" ").unwrap()) {
         hands.push(Hand::new(
             cards.to_string(),
             bid.parse::<u32>().unwrap(),
-            true,
+            part2,
         ));
     }
     hands.sort();
@@ -207,7 +196,7 @@ mod tests {
     #[test]
     fn part1_ex() {
         let expected = 6440;
-        let result = part1(include_str!("example.in"));
+        let result = solve(include_str!("example.in"), false);
         println!("expected: {:?}, received {:?}", expected, result);
         assert_eq!(result.is_ok_and(|x| x == expected), true);
     }
